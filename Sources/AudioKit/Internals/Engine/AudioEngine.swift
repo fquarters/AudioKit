@@ -1,28 +1,54 @@
 // Copyright AudioKit. All Rights Reserved. Revision History at http://github.com/AudioKit/AudioKit/
 
 import AVFoundation
-import CAudioKit
 
 extension AVAudioNode {
-    /// Disconnect and manage engine connections
-    public func disconnect(input: AVAudioNode) {
+
+    /// Disconnect without breaking other connections.
+    func disconnect(input: AVAudioNode) {
+
         if let engine = engine {
-            for bus in 0 ..< numberOfInputs {
+
+            var newConnections: [AVAudioNode: [AVAudioConnectionPoint]] = [:]
+            for bus in 0 ..< inputCount {
                 if let cp = engine.inputConnectionPoint(for: self, inputBus: bus) {
                     if cp.node === input {
-                        engine.disconnectNodeInput(self, bus: bus)
+                        let points = engine.outputConnectionPoints(for: input, outputBus: 0)
+                        newConnections[input] = points.filter { $0.node != self }
                     }
+                }
+            }
+
+            for (node, connections) in newConnections {
+                if connections.isEmpty {
+                    engine.disconnectNodeOutput(node)
+                } else {
+                    engine.connect(node, to: connections, fromBus: 0, format: Settings.audioFormat)
                 }
             }
         }
     }
 
     /// Make a connection without breaking other connections.
-    public func connect(input: AVAudioNode, bus: Int, format: AVAudioFormat? = Settings.audioFormat) {
+    func connect(input: AVAudioNode, bus: Int, format: AVAudioFormat? = Settings.audioFormat) {
+        if let engine = engine {
+            var points = engine.outputConnectionPoints(for: input, outputBus: 0)
+            if points.contains(where: {
+                $0.node === self && $0.bus == bus
+            }) { return }
+            points.append(AVAudioConnectionPoint(node: self, bus: bus))
+            engine.connect(input, to: points, fromBus: 0, format: format)
+        }
+    }
+}
+
+extension AVAudioMixerNode {
+    /// Make a connection without breaking other connections.
+    public func connectMixer(input: AVAudioNode, format: AVAudioFormat? = Settings.audioFormat) {
         if let engine = engine {
             var points = engine.outputConnectionPoints(for: input, outputBus: 0)
             if points.contains(where: { $0.node === self }) { return }
-            points.append(AVAudioConnectionPoint(node: self, bus: bus))
+            points.append(AVAudioConnectionPoint(node: self, bus: nextAvailableInputBus))
             engine.connect(input, to: points, fromBus: 0, format: format)
         }
     }
@@ -36,6 +62,7 @@ public class AudioEngine {
     // maximum number of frames the engine will be asked to render in any single render call
     let maximumFrameCount: AVAudioFrameCount = 1_024
 
+    /// Main mixer at the end of the signal chain
     public private(set) var mainMixerNode: Mixer?
 
     /// Input node mixer
@@ -51,6 +78,9 @@ public class AudioEngine {
     let _input = InputNode()
 
     /// Input for microphone or other device is created when this is accessed
+    /// If adjusting AudioKit.Settings, do so before setting up the microphone.
+    /// Setting the .defaultToSpeaker option in AudioKit.Settings.session.setCategory after setting up your mic
+    /// can cause the AVAudioEngine to stop running.
     public var input: InputNode? {
         if #available(macOS 10.14, *) {
             guard Bundle.main.object(forInfoDictionaryKey: "NSMicrophoneUsageDescription") != nil else {
@@ -87,7 +117,7 @@ public class AudioEngine {
                 avEngine.attach(node.avAudioNode)
 
                 // has the sample rate changed?
-                if let currentSampleRate = mainMixerNode?.avAudioUnitOrNode.outputFormat(forBus: 0).sampleRate,
+                if let currentSampleRate = mainMixerNode?.avAudioNode.outputFormat(forBus: 0).sampleRate,
                     currentSampleRate != Settings.sampleRate {
                     Log("Sample Rate has changed, creating new mainMixerNode at", Settings.sampleRate)
                     removeEngineMixer()
@@ -108,7 +138,7 @@ public class AudioEngine {
     private func createEngineMixer() {
         guard mainMixerNode == nil else { return }
 
-        let mixer = Mixer()
+        let mixer = Mixer(name: "AudioKit Engine Mixer")
         avEngine.attach(mixer.avAudioNode)
         avEngine.connect(mixer.avAudioNode, to: avEngine.outputNode, format: Settings.audioFormat)
         mainMixerNode = mixer
@@ -120,6 +150,19 @@ public class AudioEngine {
         mixer.removeAllInputs()
         mixer.detach()
         mainMixerNode = nil
+    }
+    
+    /// Disconnect and reconnect every node
+    /// Use this for instance after you change AK sample rate
+    public func rebuildGraph() {
+        // save the old output
+        let out = output
+        
+        // disconnect everything
+        out?.disconnectAV()
+        
+        // reset the output to the saved one, triggering the re-connect functions
+        output = out
     }
 
     /// Start the engine
@@ -134,6 +177,11 @@ public class AudioEngine {
     /// Stop the engine
     public func stop() {
         avEngine.stop()
+    }
+
+    /// Pause the engine
+    public func pause() {
+        avEngine.pause()
     }
 
     /// Start testing for a specified total duration
@@ -189,7 +237,7 @@ public class AudioEngine {
     }
 
     /// Enumerate the list of available input devices.
-    public static var inputDevices: [Device]? {
+    public static var inputDevices: [Device] {
         #if os(macOS)
         return AudioDeviceUtils.devices().compactMap { (id: AudioDeviceID) -> Device? in
             if AudioDeviceUtils.inputChannels(id) > 0 {
@@ -213,12 +261,12 @@ public class AudioEngine {
             }
             return returnDevices
         }
-        return nil
+        return []
         #endif
     }
 
     /// Enumerate the list of available output devices.
-    public static var outputDevices: [Device]? {
+    public static var outputDevices: [Device] {
         #if os(macOS)
         return AudioDeviceUtils.devices().compactMap { (id: AudioDeviceID) -> Device? in
             if AudioDeviceUtils.outputChannels(id) > 0 {
@@ -235,13 +283,13 @@ public class AudioEngine {
             }
             return outs
         }
-        return nil
+        return []
         #endif
     }
 
     #if os(macOS)
     /// Enumerate the list of available devices.
-    public static var devices: [Device]? {
+    public static var devices: [Device] {
         return AudioDeviceUtils.devices().map { id in
             Device(deviceID: id)
         }
@@ -307,6 +355,7 @@ public class AudioEngine {
     ///
     /// - Parameters:
     ///   - audioFile: A file initialized for writing
+    ///   - maximumFrameCount: Highest frame count to render, defaults to 4096
     ///   - duration: Duration to render, in seconds
     ///   - prerender: Closure called before rendering starts, used to start players, set initial parameters, etc.
     ///   - progress: Closure called while rendering, use this to fetch render progress

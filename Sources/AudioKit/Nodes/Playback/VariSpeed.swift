@@ -1,13 +1,20 @@
 // Copyright AudioKit. All Rights Reserved. Revision History at http://github.com/AudioKit/AudioKit/
 
 import AVFoundation
-import CAudioKit
 
 /// AudioKit version of Apple's VariSpeed Audio Unit
 ///
-public class VariSpeed: Node, Toggleable {
+public class VariSpeed: Node {
 
     fileprivate let variSpeedAU = AVAudioUnitVarispeed()
+
+    let input: Node
+
+    /// Connected nodes
+    public var connections: [Node] { [input] }
+    
+    /// Underlying AVAudioNode
+    public var avAudioNode: AVAudioNode
 
     /// Rate (rate) ranges form 0.25 to 4.0 (Default: 1.0)
     public var rate: AUValue = 1.0 {
@@ -31,14 +38,11 @@ public class VariSpeed: Node, Toggleable {
     ///   - rate: Rate (rate) ranges from 0.25 to 4.0 (Default: 1.0)
     ///
     public init(_ input: Node, rate: AUValue = 1.0) {
+        self.input = input
         self.rate = rate
         lastKnownRate = rate
 
-        super.init(avAudioNode: AVAudioNode())
-        avAudioUnit = variSpeedAU
         avAudioNode = variSpeedAU
-
-        connections.append(input)
     }
 
     /// Function to start, play, or activate the node, all do the same thing

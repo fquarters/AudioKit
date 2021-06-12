@@ -1,8 +1,90 @@
-# AudioKit 5 Migration Guide
+# Migration Guide
 
-AudioKit 5 is still in development, and in order to ensure high quality, some parts of AudioKit 4 have been removed, so the first step in migrating to AudioKit 5 is to determine whether what you used in AudioKit 4 is still available. 
+## AudioKit 5.1 to 5.2
 
-## Removed
+This version update involves separating AudioKit into separate Sub-AudioKits which are included as separate Swift Packages. This way, developers do not have to compile code that their apps don't require. Most users will probably have to include the SoundpipeAudioKit package since that is the one that contained many of the oscillators, effects, and filters. In addition to including the packages, developers may also have to update their files to import the correct packages. 
+
+| Class                              | New Package       |
+|------------------------------------|-------------------|
+| DynaRageCompressor                 | DevoloopAudioKit  |
+| RhinoGuitarProcessor               | DevoloopAudioKit  |
+| Flanger                            | DunneAudioKit     |
+| Chorus                             | DunneAudioKit     |
+| Sampler                            | DunneAudioKit     |
+| StereoDelay                        | DunneAudioKit     |
+| Synth                              | DunneAudioKit     |
+| TransientShaper                    | DunneAudioKit     |
+| DiodeClipper                       | SoulAudioKit      |
+| BrownianNoise                      | SoundpipeAudioKit |
+| Drip                               | SoundpipeAudioKit |
+| DynamicOscillator                  | SoundpipeAudioKit |
+| FMOscillator                       | SoundpipeAudioKit |
+| MetalBar                           | SoundpipeAudioKit |
+| MorphingOscillator                 | SoundpipeAudioKit |
+| Oscillator                         | SoundpipeAudioKit |
+| PWMOscillator                      | SoundpipeAudioKit |
+| PhaseDistortionOscillator          | SoundpipeAudioKit |
+| PhaseLockedVocoder                 | SoundpipeAudioKit |
+| PinkNoise                          | SoundpipeAudioKit |
+| PluckedString                      | SoundpipeAudioKit |
+| WhiteNoise                         | SoundpipeAudioKit |
+| VocalTract                         | SoundpipeAudioKit |
+| AmplitudeEnvelope                  | SoundpipeAudioKit |
+| AutoPanner                         | SoundpipeAudioKit |
+| AutoWah                            | SoundpipeAudioKit |
+| Balancer                           | SoundpipeAudioKit |
+| BandPassButterworthFilter          | SoundpipeAudioKit |
+| BandRejectButterworthFilter        | SoundpipeAudioKit |
+| BitCrusher                         | SoundpipeAudioKit |
+| ChowningReverb                     | SoundpipeAudioKit |
+| Clipper                            | SoundpipeAudioKit |
+| CombFilterReverb                   | SoundpipeAudioKit |
+| Convolution                        | SoundpipeAudioKit |
+| CostelloReverb                     | SoundpipeAudioKit |
+| DCBlock                            | SoundpipeAudioKit |
+| DynamicRangeCompressor             | SoundpipeAudioKit |
+| EqualizerFilter                    | SoundpipeAudioKit |
+| FlatFrequencyResponseReverb        | SoundpipeAudioKit |
+| FormantFilter                      | SoundpipeAudioKit |
+| HighPassButterworthFilter          | SoundpipeAudioKit |
+| HighShelfParametricEqualizerFilter | SoundpipeAudioKit |
+| KorgLowPassFilter                  | SoundpipeAudioKit |
+| LowPassButterworthFilter           | SoundpipeAudioKit |
+| LowShelfParametricEqualizerFilter  | SoundpipeAudioKit |
+| ModalResonanceFilter               | SoundpipeAudioKit |
+| MoogLadder                         | SoundpipeAudioKit |
+| Panner                             | SoundpipeAudioKit |
+| PeakingParametricEqualizerFilter   | SoundpipeAudioKit |
+| Phaser                             | SoundpipeAudioKit |
+| PitchShifter                       | SoundpipeAudioKit |
+| ResonantFilter                     | SoundpipeAudioKit |
+| RolandTB303Filter                  | SoundpipeAudioKit |
+| StringResonator                    | SoundpipeAudioKit |
+| TanhDistortion                     | SoundpipeAudioKit |
+| ThreePoleLowpassFilter             | SoundpipeAudioKit |
+| ToneComplementFilter               | SoundpipeAudioKit |
+| ToneFilter                         | SoundpipeAudioKit |
+| Tremolo                            | SoundpipeAudioKit |
+| VariableDelay                      | SoundpipeAudioKit |
+| ZitaReverb                         | SoundpipeAudioKit |
+| OperationEffect                    | SporthAudioKit    |
+| OperationGenerator                 | SporthAudioKit    |
+| Clarinet                           | STKAudioKit       |
+| Flute                              | STKAudioKit       |
+| MandolinString                     | STKAudioKit       |
+| RhodesPiano                        | STKAudioKit       |
+| Shaker                             | STKAudioKit       |
+| TubularBells                       | STKAudioKit       |
+
+## AudioKit 5.0 to 5.1
+
+The major change in AudioKit 5.1 is that the `Node` class was changed to be a `Node` protocol.  The parameters and parameter definition system was cleaned up as well. While these are big changes that warrant the version change, they shouldn't affect most users.
+
+## AudioKit 4.x to 5.0
+
+In order to ensure high quality for AudioKit 5, some parts of AudioKit 4 have been removed, so the first step in migrating to AudioKit 5 is to determine whether what you used in AudioKit 4 is still available. 
+
+## Removed from v5
 
 So, first we'll start out with a list of things that are just not in AudioKit 5 in any form:
 
@@ -16,7 +98,7 @@ So, first we'll start out with a list of things that are just not in AudioKit 5 
 
 5. `AKMetronome` has been removed. Its easy enough to create a metronome with `Sequencer` and one track. This will be demonstrated in the Cookbook examples project.
 
-## Significantly Changed
+## Significantly Changed in v5
 
 The following items have been very significantly changed, even if their names are similar:
 
@@ -24,15 +106,15 @@ The following items have been very significantly changed, even if their names ar
 
 2. AudioKit' 4's audio player `AKPlayer` and its associated `AKDynamicPlayer` and `AKAbstractPlayer` have all been removed. In its place we have `AudioPlayer` which is simpler. 
 
-3. The following taps have been removed: `AKLazyTap`, `AKRenderTap` and `AKTimelineTap`. Instead, many of our nodes are `Tappable` and we also have traditional AVAudioEngine style taps: `AmplitudeTap`, `PitchTap`,  and `RawDataTap`.
+3. The following taps have been removed: `AKLazyTap`, `AKRenderTap` and `AKTimelineTap`. Instead, we have traditional AVAudioEngine style taps: `AmplitudeTap`, `PitchTap`,  and `RawDataTap`.
 
-## Lesser Differences
+## Minor Changes in v5
 
 Next we have things that are different but rather trivial to reimplement (and very worthwhile to do so).
 
 1. The best way to use AudioKit 5 is to use Swift Package Manager. If you're hooked on Cocoapods, we still plan to provide Cocoapod versions, but we strongly encourage you to move to SPM. We have, and we do not regret it. 
 
-2. `AudioKitUI` is no longer a separate framework. You can delete any imports of this. Some of the widgets that were inside of this framework have been removed entirely, but the important stuff, like waveform display, are now included in AudioKit.
+2. `AudioKitUI` is now a [separate package](https://github.com/AudioKit/AudioKitUI) that has AudioKit as a dependency.
 
 3. The AudioKit singleton no longer exists so instead of writing
 ```
@@ -85,7 +167,7 @@ Also, `AKMicrophoneTracker` was removed. Using an `AudioEngine`'s `InputNode` al
 
 9. All of the projects in the Examples for have been moved out of this repository. See the [Examples](Examples.md) documentary for links to the new repositories. 
 
-# Class Name Changes and Notes
+## v4-v5 Class Name Changes
 
 | Old Name                               | New Name                           | Notes                                                                                                                                                        |
 | -------------------------------------- | ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -121,7 +203,7 @@ Also, `AKMicrophoneTracker` was removed. Using an `AudioEngine`'s `InputNode` al
 | AKClipRecorder                         | -                                  |                                                                                                                                                              |
 | AKClipper                              | Clipper                            | All effects need an input. ie. no more empty initialzers with connections defined later.                                                                     |
 | AKCombFilterReverb                     | CombFilterReverb                   | All effects need an input. ie. no more empty initialzers with connections defined later.                                                                     |
-| AKComponent                            | AudioUnitContainer                 |                                                                                                                                                              |
+| AKComponent                            | -                                  |                                                                                                                                                               |
 | AKCompressor                           | Compressor                         | All effects need an input. ie. no more empty initialzers with connections defined later.                                                                     |
 | AKComputedParameter                    | ComputedParameter                  |                                                                                                                                                              |
 | AKConvolution                          | Convolution                        | All effects need an input. ie. no more empty initialzers with connections defined later.                                                                     |
@@ -162,7 +244,7 @@ Also, `AKMicrophoneTracker` was removed. Using an `AudioEngine`'s `InputNode` al
 | AKKeyboardDelegate                     | KeyboardDelegate                   |                                                                                                                                                              |
 | AKKeyboardView                         | KeyboardView                       |                                                                                                                                                              |
 | AKKorgLowPassFilter                    | KorgLowPassFilter                  | All effects need an input. ie. no more empty initialzers with connections defined later.                                                                     |
-| AKLazyTap                              | -                                  | Replaced by Tappable nodes.                                                                                                                                  |
+| AKLazyTap                              | -                                  |                                                                                                                                                              |
 | AKLog(fullname:file:line:\_:)          | Log(fullname:file:line:\_:)        |                                                                                                                                                              |
 | AKLowPassButterworthFilter             | LowPassButterworthFilter           | All effects need an input. ie. no more empty initialzers with connections defined later.                                                                     |
 | AKLowPassFilter                        | LowPassFilter                      | All effects need an input. ie. no more empty initialzers with connections defined later.                                                                     |
@@ -244,7 +326,7 @@ Also, `AKMicrophoneTracker` was removed. Using an `AudioEngine`'s `InputNode` al
 | AKPropertySlider                       | -                                  | We have removed most of UI elements that were not specific to audio.                                                                                         |
 | AKRawMIDIPacket                        | RawMIDIPacket                      |                                                                                                                                                              |
 | AKRecordingResult                      | -                                  |                                                                                                                                                              |
-| AKRenderTap                            | -                                  | Replaced by Tappable nodes.                                                                                                                                  |
+| AKRenderTap                            | -                                  |                                                                                                                                                              |
 | AKResonantFilter                       | ResonantFilter                     | All effects need an input. ie. no more empty initialzers with connections defined later.                                                                     |
 | AKResourcesAudioFileLoaderView         | -                                  | We have removed most of UI elements that were not specific to audio.                                                                                         |
 | AKReverb                               | Reverb                             | All effects need an input. ie. no more empty initialzers with connections defined later.                                                                     |
@@ -296,7 +378,7 @@ Also, `AKMicrophoneTracker` was removed. Using an `AudioEngine`'s `InputNode` al
 | AKWhiteNoise                           | WhiteNoise                         |                                                                                                                                                              |
 | AKZitaReverb                           | ZitaReverb                         | All effects need an input. ie. no more empty initialzers with connections defined later.                                                                     |
 | AudioKit                               | -                                  | This was a global singleton, instead create an instance of AudioEngine.                                                                                      |
-| AudioKitUI                             | -                                  | No longer need to import AudioKitUI. Whatever user interface elements we provide will be in AudioKit.                                                        |
+| AudioKitUI                             | -                                  | [Separate package](https://github.com/AudioKit/AudioKitUI)                                                                                                 |
 | ClipMergeDelegate                      | -                                  | Original programmer hired by Apple and not available for maintaining.                                                                                        |
 | ClipMergerError                        | -                                  | Original programmer hired by Apple and not available for maintaining.                                                                                        |
 | ClipRecordingError                     | -                                  | Original programmer hired by Apple and not available for maintaining.                                                                                        |
