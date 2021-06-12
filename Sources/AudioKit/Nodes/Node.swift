@@ -225,7 +225,7 @@ public func instantiate(mixer code: String) -> AVAudioNode {
     instantiate(componentDescription: AudioComponentDescription(mixer: code))
 }
 
-protocol HasInternalConnections: AnyObject {
+public protocol HasInternalConnections: AnyObject {
 
     /// Override point for any connections internal to the node.
     func makeInternalConnections()
