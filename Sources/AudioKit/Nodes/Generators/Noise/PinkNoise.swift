@@ -8,7 +8,10 @@ import CAudioKit
 public class PinkNoise: Node {
 
     /// Connected nodes
-    public var connections: [Node] { [] }
+    public var connections: [Node] {
+        get { [] }
+        set {}
+    }
 
     /// Underlying AVAudioNode
     public var avAudioNode = instantiate(instrument: "pink")

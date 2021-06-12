@@ -7,10 +7,17 @@ import CAudioKit
 /// An automatic wah effect, ported from Guitarix via Faust.
 public class AutoWah: Node {
 
-    let input: Node
+    var input: Node
 
     /// Connected nodes
-    public var connections: [Node] { [input] }
+    public var connections: [Node] {
+        get {
+            [input]
+        }
+        set {
+            input = newValue[0]
+        }
+    }
 
     /// Underlying AVAudioNode
     public var avAudioNode = instantiate(effect: "awah")

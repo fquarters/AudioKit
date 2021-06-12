@@ -11,7 +11,10 @@ import CAudioKit
 public class AudioPlayer: Node {
 
     /// Nodes providing input to this node.
-    public var connections: [Node] { [] }
+    public var connections: [Node] {
+        get { [] }
+        set {}
+    }
 
     /// The underlying player node
     public private(set) var playerNode = AVAudioPlayerNode()

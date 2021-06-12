@@ -11,7 +11,14 @@ public class Mixer: Node, NamedNode {
     var inputs: [Node] = []
     
     /// Connected nodes
-    public var connections: [Node] { inputs }
+    public var connections: [Node] {
+        get {
+            inputs
+        }
+        set {
+            inputs = newValue
+        }
+    }
 
     /// Underlying AVAudioNode
     public var avAudioNode: AVAudioNode

@@ -10,7 +10,10 @@ import CoreAudio
 open class MIDIInstrument: Node, MIDIListener, NamedNode {
 
     /// Connected nodes
-    public var connections: [Node] { [] }
+    public var connections: [Node] {
+        get { [] }
+        set {}
+    }
 
     /// The internal AVAudioEngine AVAudioNode
     public var avAudioNode: AVAudioNode

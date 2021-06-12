@@ -9,10 +9,17 @@ public class Decimator: Node {
 
     fileprivate let effectAU = AVAudioUnitEffect(appleEffect: kAudioUnitSubType_Distortion)
 
-    let input: Node
+    var input: Node
 
     /// Connected nodes
-    public var connections: [Node] { [input] }
+    public var connections: [Node] {
+        get {
+            [input]
+        }
+        set {
+            input = newValue[0]
+        }
+    }
 
     /// Underlying AVAudioNode
     public var avAudioNode: AVAudioNode { effectAU }

@@ -12,11 +12,19 @@ import CAudioKit
 ///
 public class Balancer: Node {
 
-    let input: Node
-    let comparator: Node
+    var input: Node
+    var comparator: Node
     
-    /// Conneced nodes
-    public var connections: [Node] { [input, comparator] }
+    /// Connected nodes
+    public var connections: [Node] {
+        get {
+            [input, comparator]
+        }
+        set {
+            input = newValue[0]
+            comparator = newValue[1]
+        }
+    }
 
     /// Underlying AVAudioNode
     public var avAudioNode = instantiate(effect: "blnc")

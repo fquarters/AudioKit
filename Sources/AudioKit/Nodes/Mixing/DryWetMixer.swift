@@ -7,11 +7,19 @@ import CAudioKit
 ///
 public class DryWetMixer: Node {
 
-    let input1: Node
-    let input2: Node
+    var input1: Node
+    var input2: Node
     
     /// Connected nodes
-    public var connections: [Node] { [input1, input2] }
+    public var connections: [Node] {
+        get {
+            [input1, input2]
+        }
+        set {
+            input1 = newValue[0]
+            input2 = newValue[1]
+        }
+    }
 
     /// Underlying AVAudioNode
     public var avAudioNode = instantiate(mixer: "dwmx")

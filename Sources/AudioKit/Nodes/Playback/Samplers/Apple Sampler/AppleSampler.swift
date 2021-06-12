@@ -39,7 +39,10 @@ open class AppleSampler: Node {
     public var samplerUnit = AVAudioUnitSampler()
 
     /// Connected nodes
-    public var connections: [Node] { [] }
+    public var connections: [Node] {
+        get { [] }
+        set {}
+    }
     
     /// Underlying AVAudioNode
     public var avAudioNode: AVAudioNode { samplerUnit }

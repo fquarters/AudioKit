@@ -9,10 +9,17 @@ public class PeakLimiter: Node {
 
     fileprivate let effectAU = AVAudioUnitEffect(appleEffect: kAudioUnitSubType_PeakLimiter)
 
-    let input: Node
+    var input: Node
 
     /// Connected nodes
-    public var connections: [Node] { [input] }
+    public var connections: [Node] {
+        get {
+            [input]
+        }
+        set {
+            input = newValue[0]
+        }
+    }
 
     /// Underlying AVAudioNode
     public var avAudioNode: AVAudioNode { effectAU }

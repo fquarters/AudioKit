@@ -13,7 +13,10 @@ import CAudioKit
 public class VocalTract: Node {
 
     /// Connected nodes
-    public var connections: [Node] { [] }
+    public var connections: [Node] {
+        get { [] }
+        set {}
+    }
 
     /// Underlying AVAudioNode
     public var avAudioNode = instantiate(instrument: "vocw")

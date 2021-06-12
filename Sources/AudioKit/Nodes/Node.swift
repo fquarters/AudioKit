@@ -7,7 +7,7 @@ import CAudioKit
 public protocol Node: AnyObject {
 
     /// Nodes providing audio input to this node.
-    var connections: [Node] { get }
+    var connections: [Node] { get set }
 
     /// Internal AVAudioEngine node.
     var avAudioNode: AVAudioNode { get }

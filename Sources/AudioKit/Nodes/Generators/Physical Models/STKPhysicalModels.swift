@@ -5,7 +5,10 @@ import AVFoundation
 /// Superclass for STK physical models, do not use directly
 public class STKBase: Node, MIDITriggerable  {
     /// Connected nodes
-    public var connections: [Node] { [] }
+    public var connections: [Node] {
+        get { [] }
+        set {}
+    }
     
     /// Underlying AVAudioNode
     public var avAudioNode: AVAudioNode

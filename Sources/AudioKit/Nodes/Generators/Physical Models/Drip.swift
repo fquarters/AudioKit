@@ -10,7 +10,10 @@ import CAudioKit
 public class Drip: Node, Triggerable {
 
     /// Connected nodes
-    public var connections: [Node] { [] }
+    public var connections: [Node] {
+        get { [] }
+        set {}
+    }
 
     /// Underlying AVAudioNode
     public var avAudioNode = instantiate(instrument: "drip")

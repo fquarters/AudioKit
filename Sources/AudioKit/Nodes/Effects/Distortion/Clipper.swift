@@ -7,10 +7,17 @@ import CAudioKit
 /// Clips a signal to a predefined limit, in a "soft" manner, using one of three methods.
 public class Clipper: Node {
 
-    let input: Node
+    var input: Node
 
     /// Connected nodes
-    public var connections: [Node] { [input] }
+    public var connections: [Node] {
+        get {
+            [input]
+        }
+        set {
+            input = newValue[0]
+        }
+    }
 
     /// Underlying AVAudioNode
     public var avAudioNode = instantiate(effect: "clip")
